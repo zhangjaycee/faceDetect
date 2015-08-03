@@ -20,6 +20,7 @@ void preProcess(Mat &frameProc);
 void faceDetect(Mat &frameProc,vector<Rect> &faces);
 int findEyes(vector<Rect> &faces,vector<Rect> &leftEyeRect, vector<Rect> &rightEyeRect);
 Mat faceProcess(Point leftEye,Point rightEye,vector<Rect> &facesRect);
+double getSimilarity(const Mat A, const Mat B);
 
 #endif // PERPROCESS_H
 
