@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 {
     int firstFaceFlag=1;
     int collectFlag=0;
-    int trainFlag=0;
+    int trainedFlag=0;
     clock_gettime(CLOCK_REALTIME,&t0);
     //load xml
     //char * faceCascadeFilename="/usr/local/share/OpenCV/lbpcascades/lbpcascade_frontalface.xml";
@@ -50,15 +50,31 @@ int main(int argc, char *argv[])
         exit(1);
     }
     //string faceRecAlgorithm="FaceRecognizer.Fisherfaces";
-    string faceRecAlgorithm="FaceRecognizer.Eigenfaces";
+    //string faceRecAlgorithm="FaceRecognizer.Eigenfaces";
+    string faceRecAlgorithm="FaceRecognizer.LBPH";
     Ptr<FaceRecognizer> model;
     model= Algorithm::create<FaceRecognizer>(faceRecAlgorithm);
     if(model.empty()){
         printf("ERROR: FaceRecognizer not available!\n");
         exit(1);
     }
+    //load .yml train data
+    Mat labels;
+
+    try{
+        model->load("trainedModel.yml");
+        //labels=model->get<Mat>("labels");
+    }catch(cv::Exception &e){}
+    //if(labels.rows<=0){
+    //    cerr<<"ERROR:couldnt load trained data"<<endl;
+    //    trainedFlag=0;
+    //}else{
+        //printf("data loaded,%d faces alredy there\n",(int)preProcessedFaces.size());
+        printf("data loaded\n ");
+        trainedFlag=1;
+    //}
     //init camera
-    int camNumber=1;
+    int camNumber=0;
     if(argc>1){
         camNumber=atoi(argv[1]);
     }
@@ -96,7 +112,7 @@ int main(int argc, char *argv[])
             //printf("t0_sec=%ld\tt1_sec=%ld\t",t0.tv_sec,t1.tv_sec);
             timediff=(t1.tv_sec-t0.tv_sec);
             //printf("timediff=%ld\n",timediff);
-            if(trainFlag==0&&(firstFaceFlag||timediff>1)){
+            if(firstFaceFlag||timediff>1){
                     collectFlag=1;
             }
             //get eye point
@@ -131,15 +147,20 @@ int main(int argc, char *argv[])
                 //flag set to 0
                 collectFlag=0;
                 printf("collect count=%d\n",(int)preProcessedFaces.size());
-                if((int)preProcessedFaces.size()>=30){
-                    printf("collect finished\n");
+                if((trainedFlag==0)&&((int)preProcessedFaces.size()>=30)){
+                    printf("30 faces collect finished\n");
                     printf("train start\n");
                     model->train(preProcessedFaces,faceLabels);
                     printf("train finished\n");
-                    trainFlag=1;
+                    trainedFlag=1;
+                }else if(trainedFlag==1){
+                    printf("colleton more face,updating model..\n");
+                    model->update(preProcessedFaces,faceLabels);
+                    printf("%d faces in the model now\n",(int)preProcessedFaces.size());
                 }
-            }else if(trainFlag){
-                //start predict
+            }
+            if(trainedFlag){
+               //start predict
                 printf("[predict mode]\t");
                 int identify =model->predict(faceProcessed);
                 /***/
@@ -155,7 +176,12 @@ int main(int argc, char *argv[])
                     identify=-1;
                 }
                 /***/
-                printf("person %d\n",identify);
+                if(identify==-1){
+                    printf("not zjc\n");
+                }else if(identify==0){
+                    printf("hello jaycee!\n");
+                }
+                //printf("person %d\n",identify);
             }
             //show Rects
             rectangle(frame, facesRect[0], Scalar(255,0,0));//show faceRect
@@ -166,6 +192,8 @@ int main(int argc, char *argv[])
         imshow("frame",frame);
         key=waitKey(20);
         if(key==27){
+            model->save("trainedModel.yml");
+            printf("save trained data ok,%d faces in it now.\nbye!~\n",(int)preProcessedFaces.size());
             break;
         }
     }
