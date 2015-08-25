@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 {
     int firstFaceFlag=1;
     int collectFlag=0;
-    int trainFlag=0;
+    int trainedFlag=0;\
     clock_gettime(CLOCK_REALTIME,&t0);
     //load xml
     //char * faceCascadeFilename="/usr/local/share/OpenCV/lbpcascades/lbpcascade_frontalface.xml";
@@ -53,6 +53,17 @@ int main(int argc, char *argv[])
     string faceRecAlgorithm="FaceRecognizer.Eigenfaces";
     Ptr<FaceRecognizer> model;
     model= Algorithm::create<FaceRecognizer>(faceRecAlgorithm);
+    //load yml
+    Mat labels;
+    try{
+        model->load("trainedModel.yml");
+        labels=model->get<Mat>("labels");
+    }catch(cv::Exception &e){}
+    if(labels.rows<=10){
+        cout<<"ERROR:couldnt load trained data,start train"<<endl;
+    }else{
+        trainedFlag=1;
+    }
     if(model.empty()){
         printf("ERROR: FaceRecognizer not available!\n");
         exit(1);
@@ -96,7 +107,7 @@ int main(int argc, char *argv[])
             //printf("t0_sec=%ld\tt1_sec=%ld\t",t0.tv_sec,t1.tv_sec);
             timediff=(t1.tv_sec-t0.tv_sec);
             //printf("timediff=%ld\n",timediff);
-            if(trainFlag==0&&(firstFaceFlag||timediff>1)){
+            if(trainedFlag==0&&(firstFaceFlag||timediff>1)){
                     collectFlag=1;
             }
             //get eye point
@@ -136,9 +147,9 @@ int main(int argc, char *argv[])
                     printf("train start\n");
                     model->train(preProcessedFaces,faceLabels);
                     printf("train finished\n");
-                    trainFlag=1;
+                    trainedFlag=1;
                 }
-            }else if(trainFlag){
+            }else if(trainedFlag){
                 //start predict
                 printf("[predict mode]\t");
                 int identify =model->predict(faceProcessed);
@@ -166,6 +177,7 @@ int main(int argc, char *argv[])
         imshow("frame",frame);
         key=waitKey(20);
         if(key==27){
+            model->save("trainedModel.yml");
             break;
         }
     }
