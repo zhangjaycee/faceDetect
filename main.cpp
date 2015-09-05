@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
 {
     //load xml
     //char * faceCascadeFilename="/usr/local/share/OpenCV/lbpcascades/lbpcascade_frontalface.xml";
-    char * faceCascadeFilename="/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml";
-    char * eyeCascadeFilename1="/usr/share/opencv/haarcascades/haarcascade_eye.xml";
-    char * eyeCascadeFilename2="/usr/share/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
+    char * faceCascadeFilename="/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml";
+    char * eyeCascadeFilename1="/usr/local/share/OpenCV/haarcascades/haarcascade_eye.xml";
+    char * eyeCascadeFilename2="/usr/local/share/OpenCV/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
     try{
         faceDetector.load(faceCascadeFilename);
         eyeDetector1.load(eyeCascadeFilename1);
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     }
 
     //init camera
-    int camNumber=1;
+    int camNumber=0;
     if(argc>1){
         camNumber=atoi(argv[1]);
     }
