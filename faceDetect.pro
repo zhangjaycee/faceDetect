@@ -16,10 +16,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    process.cpp
+    process.cpp \
+    gprs.cpp
 
 HEADERS += \
-    process.h
+    process.h \
+    gprs.h \
+    jc_err.h \
+    jc_wr.h
  INCLUDEPATH += /usr/local/include \
                  /usr/local/include/opencv \
                  /usr/local/include/opencv2
