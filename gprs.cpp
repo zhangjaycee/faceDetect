@@ -43,3 +43,32 @@ void stop_tcp()
 {
     close(socketfd);
 }
+
+int pic_recv()
+{
+
+    uchar ch='0';
+    int len = 76800*2;
+    int rdadByte;
+    while((rdadByte=read(socketfd,&ch,1))==1){
+        printf("%c",ch);
+        if(ch=='['){
+            rdadByte=read(socketfd,&ch,1);
+            if(ch=='!'){
+                rdadByte=read(socketfd,&ch,1);
+                if(ch=='['){
+                    break;
+                }
+            }
+        }
+    }
+    printf("trans start\n");
+    while(len>0){
+        rdadByte=read(socketfd,buf+76800*2-len,len);
+        len-=rdadByte;
+        //printf("len=%d now \n",len);
+        printf("%d\n",len);
+    }
+    return len;
+
+}

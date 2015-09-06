@@ -11,10 +11,10 @@ using namespace cv;
 using namespace std;
 
 int socketfd;
+uchar buf[76800*2];
 
 
-
-Mat frame;
+Mat frame(240, 320, CV_8UC3);
 char key;
 struct timespec timeStart,t0,t1;
 long timediff;
@@ -29,7 +29,27 @@ int person=0;
 
 int main(int argc, char *argv[])
 {
+/*test*****************
+    Mat src;
+    src=imread("/home/jaycee/Desktop/testlxg2.JPG");
+    Size little_size;
+    little_size.width=320;
+    little_size.height=240;
+    resize(src,frame,little_size);
+   // imshow("src",src);
+   // waitKey(0);
+    int test_flag=1;
+test*****************/
     init_tcp();
+    while(pic_recv()!=0);
+    //Mat recv_pic(240, 320, CV_8UC3);
+    Mat src(240,320,CV_8UC2,buf);
+    cvtColor(src, frame, CV_YUV2RGB_YUYV);
+    //cvtColor(src, recv_pic, CV_BGR5652BGR);
+    //Mat recv_pic=Mat(240,320,CV_8UC2,buf,0);
+    imshow("recvpic",frame);
+    waitKey(0);
+
     int firstFaceFlag=1;
     int collectFlag=0;
     int trainedFlag=0;\
@@ -62,10 +82,10 @@ int main(int argc, char *argv[])
     //load yml
     Mat labels;
     try{
-        model->load("trainedModel.yml");
+        model->load("/home/jaycee/Desktop/trainedModel0.yml");
         labels=model->get<Mat>("labels");
     }catch(cv::Exception &e){}
-    if(labels.rows<=10){
+    if(labels.rows<=0){
         cout<<"ERROR:couldnt load trained data,start train"<<endl;
     }else{
         trainedFlag=1;
@@ -75,10 +95,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
     //init camera
+    /*
     int camNumber=0;
     if(argc>1){
         camNumber=atoi(argv[1]);
     }
+
     VideoCapture webcam;
     webcam.open(camNumber);
 
@@ -88,9 +110,11 @@ int main(int argc, char *argv[])
     }
     webcam.set(CV_CAP_PROP_FRAME_WIDTH,640);
     webcam.set(CV_CAP_PROP_FRAME_HEIGHT,480);
+    */
     Mat faceProcessed;
     Mat oldFaceProcessed;
-    while(webcam.read(frame)){    
+    //while(webcam.read(frame)){
+    //frame=src;
         Mat frameProc;
         //perProcess
         preProcess(frameProc);
@@ -168,7 +192,7 @@ int main(int argc, char *argv[])
                 Mat reconstructionFace=Mat(reconstructionMat.size(),CV_8U);
                 reconstructionMat.convertTo(reconstructionFace,CV_8U,1,0);
                 double similaity=getSimilarity(faceProcessed,reconstructionFace);
-                if(similaity>0.7){
+                if(similaity>0.9){
                     identify=-1;
                 }
                 /***/
@@ -181,12 +205,14 @@ int main(int argc, char *argv[])
             imshow("faceProcessed",faceProcessed);
         }
         imshow("frame",frame);
-        key=waitKey(20);
+        waitKey(0);
+        /*  key=waitKey(20);
         if(key==27){
             model->save("trainedModel.yml");
             break;
         }
-    }
+        */
+    //}
 
 
     stop_tcp();

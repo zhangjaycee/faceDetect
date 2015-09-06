@@ -7,7 +7,7 @@
 #include<signal.h>
 #include<netinet/in.h>
 #include<sys/socket.h>
-
+#include <opencv2/opencv.hpp>
 #include<time.h>
 
 #ifndef GPRS_H
@@ -19,7 +19,9 @@
 
 
 extern int socketfd;
+extern uchar buf[76800*2];
 
 void init_tcp();
 void stop_tcp();
+int pic_recv();
 
