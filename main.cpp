@@ -49,9 +49,9 @@ test*****************/
     clock_gettime(CLOCK_REALTIME,&t0);
     //load xml
     //char * faceCascadeFilename="/usr/local/share/OpenCV/lbpcascades/lbpcascade_frontalface.xml";
-    char * faceCascadeFilename="/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml";
-    char * eyeCascadeFilename1="/usr/local/share/OpenCV/haarcascades/haarcascade_eye.xml";
-    char * eyeCascadeFilename2="/usr/local/share/OpenCV/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
+    char * faceCascadeFilename="haarcascade_frontalface_default.xml";
+    char * eyeCascadeFilename1="haarcascade_eye.xml";
+    char * eyeCascadeFilename2="haarcascade_eye_tree_eyeglasses.xml";
     try{
         faceDetector.load(faceCascadeFilename);
         eyeDetector1.load(eyeCascadeFilename1);
