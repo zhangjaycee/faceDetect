@@ -38,6 +38,7 @@ void init_tcp()
     close(connfd);
     //}
     */
+    printf("init gprs ok\n");
 }
 
 void stop_tcp()
