@@ -40,15 +40,8 @@ int main(int argc, char *argv[])
    // waitKey(0);
     int test_flag=1;
 test*****************/
-    init_tcp();
-    while(pic_recv()!=0);
-    //Mat recv_pic(240, 320, CV_8UC3);
-    Mat src(240,320,CV_8UC2,buf);
-    cvtColor(src, frame, CV_YUV2RGB_YUYV);
-    //cvtColor(src, recv_pic, CV_BGR5652BGR);
-    //Mat recv_pic=Mat(240,320,CV_8UC2,buf,0);
-    imshow("recvpic",frame);
-    waitKey(0);
+
+
 
     int firstFaceFlag=1;
     int collectFlag=0;
@@ -82,7 +75,7 @@ test*****************/
     //load yml
     Mat labels;
     try{
-        model->load("/home/jaycee/Desktop/trainedModel0.yml");
+        model->load("trainedModel0.yml");
         labels=model->get<Mat>("labels");
     }catch(cv::Exception &e){}
     if(labels.rows<=0){
@@ -111,8 +104,20 @@ test*****************/
     webcam.set(CV_CAP_PROP_FRAME_WIDTH,640);
     webcam.set(CV_CAP_PROP_FRAME_HEIGHT,480);
     */
-    Mat faceProcessed;
-    Mat oldFaceProcessed;
+
+     init_tcp();
+     Mat faceProcessed;
+     Mat oldFaceProcessed;
+     while(1){
+     while(pic_recv()!=0);
+     //Mat recv_pic(240, 320, CV_8UC3);
+     Mat src(240,320,CV_8UC2,buf);
+     cvtColor(src, frame, CV_YUV2RGB_YUYV);
+     //cvtColor(src, recv_pic, CV_BGR5652BGR);
+     //Mat recv_pic=Mat(240,320,CV_8UC2,buf,0);
+     //imshow("recvpic",frame);
+     //waitKey(0);
+
     //while(webcam.read(frame)){
     //frame=src;
         Mat frameProc;
@@ -202,10 +207,10 @@ test*****************/
             rectangle(frame, facesRect[0], Scalar(255,0,0));//show faceRect
             rectangle(frame,leftEyeRect[0], Scalar(0,255,0));//show eyeRect
             rectangle(frame,rightEyeRect[0], Scalar(0,255,0)); //show eyeRect
-            imshow("faceProcessed",faceProcessed);
+              // imshow("faceProcessed",faceProcessed);
         }
-        imshow("frame",frame);
-        waitKey(0);
+           //imshow("frame",frame);
+        //waitKey(0);
         /*  key=waitKey(20);
         if(key==27){
             model->save("trainedModel.yml");
@@ -213,6 +218,7 @@ test*****************/
         }
         */
     //}
+     }
 
 
     stop_tcp();

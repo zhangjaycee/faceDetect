@@ -7,6 +7,7 @@
 
 void init_tcp()
 {
+    printf("start init gprs\n");
     int connfd;
     int listenfd;
     socklen_t clilen;
