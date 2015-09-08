@@ -110,6 +110,7 @@ test*****************/
      Mat oldFaceProcessed;
      while(1){
      while(pic_recv()!=0);
+     printf("one frame recved\n");
      //Mat recv_pic(240, 320, CV_8UC3);
      Mat src(240,320,CV_8UC2,buf);
      cvtColor(src, frame, CV_YUV2RGB_YUYV);
@@ -136,6 +137,9 @@ test*****************/
         int eyenum=0;
         if((int)facesRect.size()>0){
             eyenum=findEyes(facesRect,leftEyeRect,rightEyeRect);
+        }else{
+            printf("no face detected\n");
+            continue;
         }
         if(eyenum==2){
             clock_gettime(CLOCK_REALTIME,&t1);
@@ -208,6 +212,9 @@ test*****************/
             rectangle(frame,leftEyeRect[0], Scalar(0,255,0));//show eyeRect
             rectangle(frame,rightEyeRect[0], Scalar(0,255,0)); //show eyeRect
               // imshow("faceProcessed",faceProcessed);
+        }else{
+            printf("there is no 2 eyes\n");
+            continue;
         }
            //imshow("frame",frame);
         //waitKey(0);
