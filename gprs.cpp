@@ -38,7 +38,7 @@ void init_tcp()
     close(connfd);
     //}
     */
-    printf("init gprs ok\n");
+    printf("init gprs\n");
 }
 
 void stop_tcp()
@@ -48,19 +48,18 @@ void stop_tcp()
 
 int pic_recv()
 {
-
+    printf("start recv from sockfd=%d\n",socketfd);
     uchar ch='0';
     int len = 76800*2;
     int rdadByte;
     while((rdadByte=read(socketfd,&ch,1))==1){
         printf("%c",ch);
         if(ch=='['){
+            printf("[ recved\n");
             rdadByte=read(socketfd,&ch,1);
             if(ch=='!'){
-                rdadByte=read(socketfd,&ch,1);
-                if(ch=='['){
-                    break;
-                }
+                printf("! recved\n");
+                break;
             }
         }
     }
