@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
         imshow("frame",frame);
         key=waitKey(20);
         if(key==27){
-            model_smile->save("smile.yml");
+           // model_smile->save("smile.yml");
             break;
         }
     }
