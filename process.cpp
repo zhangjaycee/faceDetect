@@ -198,7 +198,6 @@ Mat faceProcess(Point leftEye,Point rightEye,vector<Rect> &facesRect)
     ellipse(mask,faceCenter,size,0,0,360,Scalar(0),CV_FILLED);
     filteredFace.setTo(Scalar(128),mask);
     return filteredFace;
-
 }
 
 double getSimilarity(const Mat A, const Mat B){

@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -29,7 +31,7 @@ int person=0;
 
 int main(int argc, char *argv[])
 {
-    init_tcp();
+    //init_tcp();
     int firstFaceFlag=1;
     int collectFlag=0;
     int trainedFlag=0;\
@@ -57,21 +59,29 @@ int main(int argc, char *argv[])
     }
     //string faceRecAlgorithm="FaceRecognizer.Fisherfaces";
     string faceRecAlgorithm="FaceRecognizer.Eigenfaces";
-    Ptr<FaceRecognizer> model;
-    model= Algorithm::create<FaceRecognizer>(faceRecAlgorithm);
+    Ptr<FaceRecognizer> model_smile;
+    Ptr<FaceRecognizer> model_sad;
+    model_smile= Algorithm::create<FaceRecognizer>(faceRecAlgorithm);
+    model_sad= Algorithm::create<FaceRecognizer>(faceRecAlgorithm);
     //load yml
     Mat labels;
     try{
-        model->load("trainedModel.yml");
-        labels=model->get<Mat>("labels");
+        model_smile->load("smile.yml");
+        labels=model_smile->get<Mat>("labels");
+        model_sad->load("sad.yml");
+        labels=model_sad->get<Mat>("labels");
     }catch(cv::Exception &e){}
-    if(labels.rows<=10){
+    if(labels.rows<=0){
         cout<<"ERROR:couldnt load trained data,start train"<<endl;
     }else{
         trainedFlag=1;
     }
-    if(model.empty()){
-        printf("ERROR: FaceRecognizer not available!\n");
+    if(model_smile.empty()){
+        printf("ERROR: FaceRecognizer smile not available!\n");
+        exit(1);
+    }
+    if(model_sad.empty()){
+        printf("ERROR: FaceRecognizer sad not available!\n");
         exit(1);
     }
     //init camera
@@ -151,28 +161,71 @@ int main(int argc, char *argv[])
                 if((int)preProcessedFaces.size()>=30){
                     printf("collect finished\n");
                     printf("train start\n");
-                    model->train(preProcessedFaces,faceLabels);
+                    model_smile->train(preProcessedFaces,faceLabels);
                     printf("train finished\n");
                     trainedFlag=1;
                 }
             }else if(trainedFlag){
                 //start predict
                 printf("[predict mode]\t");
-                int identify =model->predict(faceProcessed);
+                //int identify =model_smile->predict(faceProcessed);
+                int identify;
                 /***/
-                Mat eigenvectors=model->get<Mat>("eigenvectors");
-                Mat averageFaceRow=model->get<Mat>("mean");
+                Mat eigenvectors_smile=model_smile->get<Mat>("eigenvectors");
+                Mat averageFaceRow_smile=model_smile->get<Mat>("mean");
+                Mat projection_smile = subspaceProject(eigenvectors_smile,averageFaceRow_smile,faceProcessed.reshape(1,1));
+                Mat reconstructionRow_smile=subspaceReconstruct(eigenvectors_smile,averageFaceRow_smile,projection_smile);
+                Mat reconstructionMat_smile = reconstructionRow_smile.reshape(1,faceProcessed.rows);
+                Mat reconstructionFace_smile=Mat(reconstructionMat_smile.size(),CV_8U);
+                reconstructionMat_smile.convertTo(reconstructionFace_smile,CV_8U,1,0);
+
+
+                Mat eigenvectors_sad=model_sad->get<Mat>("eigenvectors");
+                Mat averageFaceRow_sad=model_sad->get<Mat>("mean");
+                Mat projection_sad = subspaceProject(eigenvectors_sad,averageFaceRow_sad,faceProcessed.reshape(1,1));
+                Mat reconstructionRow_sad=subspaceReconstruct(eigenvectors_sad,averageFaceRow_sad,projection_sad);
+                Mat reconstructionMat_sad = reconstructionRow_sad.reshape(1,faceProcessed.rows);
+                Mat reconstructionFace_sad=Mat(reconstructionMat_sad.size(),CV_8U);
+                reconstructionMat_sad.convertTo(reconstructionFace_sad,CV_8U,1,0);
+                /*
+                Mat eigenvectors=model_smile->get<Mat>("eigenvectors");
+                Mat averageFaceRow=model_smile->get<Mat>("mean");
                 Mat projection = subspaceProject(eigenvectors,averageFaceRow,faceProcessed.reshape(1,1));
                 Mat reconstructionRow=subspaceReconstruct(eigenvectors,averageFaceRow,projection);
                 Mat reconstructionMat = reconstructionRow.reshape(1,faceProcessed.rows);
                 Mat reconstructionFace=Mat(reconstructionMat.size(),CV_8U);
-                reconstructionMat.convertTo(reconstructionFace,CV_8U,1,0);
-                double similaity=getSimilarity(faceProcessed,reconstructionFace);
-                if(similaity>0.7){
+                */
+                double similaity_smile=getSimilarity(faceProcessed,reconstructionFace_smile);
+                double similaity_sad=getSimilarity(faceProcessed,reconstructionFace_sad);
+                printf("Similarity: smile=%f   sad=%f \n",similaity_smile,similaity_sad);
+                if(similaity_smile>=similaity_sad){
+                    //sad:1;smile:0  other:-1
+                    identify=1;
+                }else{
+                    identify=0;
+
+                }
+                 if((similaity_sad>0.8)&&(similaity_smile>0.8)){
+                     identify=-1;
+                 }
+
+                /*
+                if(similaity>0.6){
                     identify=-1;
                 }
+                */
                 /***/
-                printf("person %d\n",identify);
+                //printf("person %d\n",identify);
+                switch(identify){
+                    case -1:
+                        printf("other\n");
+                        break;
+                    case 0:
+                        printf("smile\n");
+                        break;
+                    case 1:
+                        printf("sad\n");
+                }
             }
             //show Rects
             rectangle(frame, facesRect[0], Scalar(255,0,0));//show faceRect
@@ -183,7 +236,7 @@ int main(int argc, char *argv[])
         imshow("frame",frame);
         key=waitKey(20);
         if(key==27){
-            model->save("trainedModel.yml");
+            model_smile->save("smile.yml");
             break;
         }
     }
